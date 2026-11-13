@@ -1,0 +1,14 @@
+{
+  "name": "hotel-booking-automation-tests",
+  "version": "1.0.0",
+  "description": "Selenium WebDriver End-to-End Test Suite for Thomas Cook Hotel Booking Portal",
+  "main": "run-selenium-tests.js",
+  "scripts": {
+    "test:e2e": "node run-selenium-tests.js",
+    "test:e2e:headless": "HEADLESS=true node run-selenium-tests.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.27.0"
+  }
+}
+
