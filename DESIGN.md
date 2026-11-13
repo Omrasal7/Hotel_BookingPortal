@@ -1,193 +1,150 @@
-# Thomas Cook Hotel Booking Portal — System Design & Quality Architecture Document
+# Thomas Cook Hotel Booking Portal - System Design & Quality Architecture
 
 | Document | DESIGN.md |
 | :--- | :--- |
 | **Candidate Role** | Automation Engineer Intern |
 | **Company** | Thomas Cook (India) Limited |
-| **Stack** | Node.js (Express), React (Vite), MySQL / SQLite, Selenium WebDriver, Jest, Supertest |
+| **Stack** | Node.js (Express), React (Vite), SQLite / MySQL, Selenium WebDriver, Jest, Supertest |
 
 ---
 
 ## 1. System Architecture
 
-The application is structured into a clean three-tier architecture with a strong focus on separation of responsibilities, contract testability, and automated validation:
+The portal has a React frontend, an Express API, and a relational database. In local development, Vite serves the frontend on port 5173 and proxies `/api` requests to the backend on port 5000.
 
-```
-[ Client Layer (React / Vite) ]
-         │
-         │  REST / JSON (Port 5173 -> Proxy -> Port 5000)
-         ▼
-[ Application Layer (Node.js / Express REST API) ]
-  ├── Routing Layer (/api/hotels, /api/bookings, /api/health)
-  ├── Validation & Pricing Engine (dateUtils.js)
-  ├── Business Logic Controllers (hotelController.js, bookingController.js)
-  └── Data Access Layer (hotelModel.js, bookingModel.js)
-         │
-         │  SQL Queries & Parameterized Statements
-         ▼
-[ Persistence Layer (MySQL 8.0 / Embedded SQLite Fallback) ]
-  ├── hotels (Properties, Capacity, Amenities JSON, Base Pricing)
-  └── bookings (Confirmed & Cancelled Reservations, References, Dates)
+```text
+[ React / Vite frontend ]
+           | JSON over HTTP
+           v
+[ Express API: routes and controllers ]
+           | parameterized SQL
+           v
+[ SQLite by default; optional MySQL ]
 ```
 
-### How the Components Interact:
-1. **Frontend (React)**: Handles user interaction, date selections, client-side input formatting, dynamic price previews, and modal state management. Interactive DOM elements are tagged with `data-testid` attributes to maximize automated testability with Selenium WebDriver.
-2. **Backend (Node.js & Express REST API)**: Validates input integrity, performs atomic availability calculations, computes pricing strictly server-side (preventing price tampering), and manages state transitions.
-3. **Database (MySQL)**: Stores relational data with foreign key constraints, unique reference indexes, and date range indexes. For zero-friction evaluation and test execution, an embedded SQLite adapter is also provided that boots instantly if MySQL is not initialized.
-4. **Automated Test Harness**:
-   - **Jest + Supertest**: Verifies API status codes, response schemas, and availability algorithms.
-   - **Selenium WebDriver (POM)**: Drives Chrome to validate full end-to-end user journeys (Search -> Reserve -> Confirm -> Retrieve -> Cancel).
+The frontend handles hotel search, date selection, price display, and booking modals. It calls the API through the service functions in `frontend/src/services/api.js`. Key controls have `data-testid` attributes for Selenium tests.
+
+The API routes requests to hotel or booking controllers. The controllers validate input and use the models for database queries. Date validation, price calculation, destination advisories, and booking-reference generation are in `backend/src/utils/dateUtils.js`. Booking prices are calculated on the server; the browser does not submit a total price.
+
+SQLite is the default local database. If `DB_DIALECT=mysql` is configured, the application attempts to connect to MySQL and falls back to SQLite if that connection fails. The MySQL schema is in `backend/database/schema.sql`; the SQLite schema is initialized in `backend/src/config/db.js`.
+
+The repository includes Jest and Supertest API/unit tests, a JavaScript Selenium suite, and a Python Selenium suite. The UI also has a QA mode with sample guest details to make manual and automated test runs easier.
 
 ---
 
 ## 2. Database Design & Relationships
 
-The database is designed with two core entities: `hotels` and `bookings`.
+The schema has two core tables: `hotels` and `bookings`. A hotel can have many bookings, and each booking refers to one hotel. Each booking request in the current API is for one room.
 
-```
-┌─────────────────────────────────┐           ┌───────────────────────────────────┐
-│             hotels              │           │             bookings              │
-├─────────────────────────────────┤           ├───────────────────────────────────┤
-│ id (INT PK AUTO_INCREMENT)      │1         *│ id (INT PK AUTO_INCREMENT)        │
-│ name (VARCHAR 255)              ├───────────┤ hotel_id (INT FK -> hotels.id)    │
-│ location (VARCHAR 100)          │           │ booking_reference (VARCHAR UNIQUE)│
-│ description (TEXT)              │           │ guest_name (VARCHAR 150)          │
-│ amenities (JSON / TEXT)         │           │ guest_email (VARCHAR 150)         │
-│ room_price_per_night (DECIMAL)  │           │ check_in_date (DATE)              │
-│ total_rooms (INT)               │           │ check_out_date (DATE)             │
-│ rating (DECIMAL 2,1)            │           │ total_nights (INT)                │
-│ image_url (VARCHAR 500)         │           │ base_amount (DECIMAL 10,2)        │
-│ created_at (TIMESTAMP)          │           │ discount_amount (DECIMAL 10,2)    │
-└─────────────────────────────────┘           │ total_amount (DECIMAL 10,2)       │
-                                              │ status (ENUM: CONFIRMED,CANCELLED)│
-                                              │ created_at (TIMESTAMP)           │
-                                              │ cancelled_at (DATETIME NULL)      │
-                                              └───────────────────────────────────┘
+```text
+hotels.id (primary key)  1 ---- many  bookings.hotel_id (foreign key)
 ```
 
-### Constraints & Indexes:
-- `booking_reference`: Enforced as `UNIQUE` to prevent colliding reservation codes.
-- `hotel_id`: Foreign key reference to `hotels.id` with `ON DELETE RESTRICT` ensuring hotel records with active bookings cannot be accidentally orphaned.
-- Composite Index `idx_hotel_dates` on `(hotel_id, status, check_in_date, check_out_date)` enables high-speed evaluation of overlapping stays.
-- Index `idx_ref_email` on `(booking_reference, guest_email)` for fast booking retrieval.
+### `hotels`
+
+The hotel row stores its name, location, description, amenities, nightly price, total room count, rating, image URL, and creation time. The MySQL schema uses JSON for amenities and has an index on location.
+
+### `bookings`
+
+A booking stores its unique reference, hotel ID, guest name and email, check-in and check-out dates, number of nights, base amount, discount amount, total amount, status, creation time, and optional cancellation time.
+
+### Constraints and indexes
+
+- `booking_reference` is unique.
+- `hotel_id` references `hotels.id` with `ON DELETE RESTRICT`. A hotel cannot be deleted while any booking row refers to it, including a cancelled booking.
+- MySQL defines `idx_ref_email` on `(booking_reference, guest_email)` and `idx_hotel_dates` on `(hotel_id, status, check_in_date, check_out_date)`.
+- The MySQL schema uses `DECIMAL` for prices and an `ENUM` for booking status. The SQLite initializer uses `REAL` for prices and `TEXT` for status, and does not define all the same indexes.
+- Date ordering and price arithmetic are checked in application code. The database schema does not define CHECK constraints for date order or amount reconciliation.
 
 ---
 
 ## 3. REST API Design
 
-All endpoints follow RESTful conventions and return standardized JSON responses:
+The API is mounted under `/api`. Responses are JSON. Successful responses generally include `success` and `data`; errors include `success` and `message`. The optional `errors` array appears on some input-validation responses, but is not present in every error response.
 
-| Method | Endpoint | Description | Request Body / Query Params | Success Code |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/health` | Service health status probe | None | `200 OK` |
-| `GET` | `/api/hotels` | Browse and filter hotels | `?location=Goa&checkInDate=...&checkOutDate=...` | `200 OK` |
-| `GET` | `/api/hotels/:id` | View hotel details & availability | `?checkInDate=...&checkOutDate=...` | `200 OK` |
-| `POST` | `/api/bookings/quote` | Calculate real-time price & discount | `{ hotel_id, check_in_date, check_out_date }` | `200 OK` |
-| `POST` | `/api/bookings` | Book one room | `{ hotel_id, guest_name, guest_email, check_in_date, check_out_date }` | `201 Created` |
-| `POST` | `/api/bookings/retrieve` | Lookup reservation | `{ booking_reference, guest_email }` | `200 OK` |
-| `POST` | `/api/bookings/:id/cancel`| Cancel booking & release room | `{ booking_reference, guest_email }` | `200 OK` |
+| Method | Endpoint | Purpose | Success code |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/health` | Return service health and active database dialect. | `200 OK` |
+| `GET` | `/api/hotels` | List hotels, optionally filtered by location and stay dates. | `200 OK` |
+| `GET` | `/api/hotels/:id` | Return one hotel's details and optional date availability. | `200 OK` |
+| `POST` | `/api/bookings/quote` | Validate dates and return a price quote and current availability. | `200 OK` |
+| `POST` | `/api/bookings` | Validate and create a booking for one room. | `201 Created` |
+| `POST` | `/api/bookings/retrieve` | Find a booking by reference and guest email. | `200 OK` |
+| `POST` | `/api/bookings/:id/cancel` | Cancel a confirmed booking. The UI sends the booking reference and email. | `200 OK` |
 
-### Consistent Error Response Format:
-```json
-{
-  "success": false,
-  "message": "Check-out date must be strictly after check-in date (minimum 1 night stay).",
-  "errors": []
-}
-```
+Invalid input and unavailable dates return `400`; missing hotels or bookings return `404`; unexpected errors return `500`. The cancel controller also permits an ID-only lookup if the reference and email are not both included. That behavior is a security limitation and should not be treated as the intended authorization flow.
 
 ---
 
-## 4. Booking Logic & Availability Calculation
+## 4. Booking Logic & Availability
 
-### 4.1 Date Validation Rules
-1. Format validated to standard `YYYY-MM-DD`.
-2. Check-in date cannot be in the past:  
-   $$\text{check\_in} \ge \text{today}$$
-3. Check-out date must be strictly after check-in:  
-   $$\text{check\_out} > \text{check\_in} \implies \text{nights} \ge 1$$
+### Date validation
 
-### 4.2 Handling Overlapping Stays
-A critical business requirement is preventing room inventory exhaustion. Two date intervals $[A_{\text{in}}, A_{\text{out}})$ and $[B_{\text{in}}, B_{\text{out}})$ overlap if and only if:
-$$\text{Overlap} \iff A_{\text{in}} < B_{\text{out}} \land A_{\text{out}} > B_{\text{in}}$$
+The API expects dates in `YYYY-MM-DD` format. Check-in cannot be before the server's local current date, and check-out must be later than check-in, giving at least one night. The number of nights is the difference between the two parsed dates. The code uses JavaScript `Date` parsing and does not round-trip the date components, so an impossible calendar date may be normalized rather than rejected.
 
-In SQL:
-```sql
-SELECT COUNT(*) as count 
-FROM bookings 
-WHERE hotel_id = ? 
-  AND status = 'CONFIRMED'
-  AND check_in_date < :requestedCheckOut 
-  AND check_out_date > :requestedCheckIn;
-```
-- Available Rooms = `total_rooms - overlapping_booked_count`.
-- If `available_rooms <= 0`, booking is rejected with `400 Bad Request: "No rooms available for the selected dates."`.
-- **Adjacent Dates (Check-out Day = Next Guest Check-in Day)**: Because strict inequalities (`<` and `>`) are used, a guest checking out on December 15th does **not** conflict with a guest checking in on December 15th!
+### Price calculation
 
-### 4.3 Cancellation Logic
-When a booking is cancelled:
-1. `status` is transitioned from `'CONFIRMED'` to `'CANCELLED'`.
-2. `cancelled_at` is stamped with `CURRENT_TIMESTAMP`.
-3. Because the availability query filters strictly for `status = 'CONFIRMED'`, the room capacity is **immediately released back into the available pool** for future guests.
+The backend calculates the base amount as nightly price multiplied by nights. Stays of four or more nights get a 10% discount. It rounds amounts to two decimal places and returns the base amount, discount amount, discount reason, and total. The booking endpoint calculates the price again when it creates the booking.
+
+### Availability
+
+A confirmed booking overlaps the requested stay when its check-in is before the requested check-out and its check-out is after the requested check-in. This treats check-out as an unused night, so one guest can check out on the day the next guest checks in.
+
+The model counts confirmed booking rows that overlap any part of the requested range, then subtracts that count from the hotel's `total_rooms`. Cancelled bookings are excluded. This simple count can report too few rooms when existing bookings overlap different parts of a longer requested stay; it does not calculate peak occupancy day by day.
+
+The availability check and booking insert are separate operations. The application checks capacity for ordinary sequential requests, but it does not guarantee capacity if requests arrive at the same time. Two requests for the last room could both pass the check before either insert completes.
+
+### Cancellation
+
+Cancellation changes a confirmed booking to `CANCELLED` and records `cancelled_at`. Availability queries count only `CONFIRMED` bookings, so the cancelled booking no longer reduces the displayed availability. A conditional update prevents a second successful cancellation of the same booking.
 
 ---
 
-## 5. Surprise Feature: "Thomas Cook Flexi-Stay Guarantee & Dynamic Long-Stay Loyalty Engine"
+## 5. Surprise Features
 
-### What the Feature Does:
-1. **Dynamic Long-Stay Loyalty Discount**: Travelers booking an extended stay of 4 or more nights automatically receive a **10% Thomas Cook loyalty discount**, calculated and itemized transparently in the price breakdown.
-2. **Destination Weather & Packing Advisory**: Tailored seasonal travel tips (climate description, recommended clothing/essentials) for each destination (e.g. Goa, Manali, Jaipur) to enrich the booking journey.
-3. **Guaranteed 48-Hour Free Cancellation Window**: Clear policy badge reassuring customers of full refunds and instant release if cancelled up to 48 hours prior to check-in.
+### Long-stay discount
 
-### Why Chosen:
-In travel and hotel booking, pricing transparency and cancellation flexibility are the two primary customer friction points. This feature provides direct financial incentive for longer vacations while removing booking anxiety.
+Stays of four nights or more receive a 10% discount. The backend calculates the discount and includes its reason in the quote. The price breakdown is shown in the booking modal. The pricing helper is covered by Jest tests, including the four-night threshold.
 
-### How Implemented:
-- Backend pricing engine in `src/utils/dateUtils.js` (`calculateStayPricing()`) computes `discount_amount` and attaches `discountReason`.
-- Stored in the database `bookings` table as `discount_amount` and `total_amount` for financial auditability.
-- Fully validated via automated Jest unit test `TC-PRC-02` and Selenium E2E test `TC-E2E-10`.
+### Destination advisory
 
----
+Hotel responses include a destination advisory with a climate description and a packing or activity suggestion for supported cities. These values are a hard-coded lookup in `dateUtils.js`; they are not live weather data.
 
-## 6. Simultaneous Bookings & Race Condition Handling
+### Cancellation wording in the interface
 
-### The Problem:
-When only 1 room remains and two users simultaneously submit a booking request for overlapping dates, a naive "read-then-write" sequence could lead to **overbooking (overselling inventory beyond total capacity)**.
-
-### Current Implementation & Production Approaches:
-1. **Application-Level Availability Guard**:
-   Before inserting a booking, `createBooking` executes an atomic availability check.
-2. **Database Transactions with Row-Level Locking (`SELECT FOR UPDATE`)**:
-   In production MySQL with InnoDB, the transaction is wrapped with:
-   ```sql
-   START TRANSACTION;
-   SELECT total_rooms FROM hotels WHERE id = ? FOR UPDATE;
-   -- Count active overlapping bookings
-   -- If count >= total_rooms: ROLLBACK and throw OverbookedException
-   -- Else: INSERT INTO bookings ...; COMMIT;
-   ```
-   This serializes concurrent transactions on the hotel row, guaranteeing that the second transaction sees the updated booking count and is safely rejected.
-3. **Pessimistic vs. Optimistic Locking**:
-   - For high-volume flash sales, Redis distributed locks (`Redlock`) with a temporary 10-minute inventory reservation hold can be placed while the user finalizes details.
+The booking interface currently advertises free cancellation up to 48 hours before check-in and a full refund. The backend does not enforce that deadline and does not issue refunds. The 48-hour value returned by the advisory is metadata only. The cancellation guarantee is therefore displayed in the interface, but is not implemented as a booking or payment rule.
 
 ---
 
-## 7. Design Decisions & Trade-Offs
+## 6. Simultaneous Bookings
 
-| Decision | Alternative Considered | Why Selected |
+The current implementation checks availability and then inserts a booking as separate database operations. It does not use a transaction, lock an inventory row, or atomically reserve a room. If two users submit requests for the last available room at the same time, both may see the room as available and both may be confirmed.
+
+The API test that fills a hotel's rooms sends requests sequentially and verifies that the next request is rejected. It checks the capacity boundary for sequential requests; it does not test simultaneous requests or prevent the race described above.
+
+---
+
+## 7. Design Decisions & Trade-offs
+
+| Decision | Alternative considered | Reason and trade-off |
 | :--- | :--- | :--- |
-| **Node.js + Express** | Java + Spring Boot | As specified in the candidate's profile, Node.js allows rapid delivery of a testable REST API with zero Spring Boot boilerplate, aligning directly with the Automation Engineer role where JavaScript/Node is the primary stack for Selenium and modern test harnesses. |
-| **Selenium WebDriver with Page Object Model** | Ad-hoc Selenium scripts | POM provides strict separation of page locators from test logic, ensuring maintainable, reusable, and robust test suites that don't break when UI elements change. |
-| **Hybrid MySQL / SQLite Data Layer** | MySQL only | The database schema and scripts are 100% MySQL 8.0 compliant (`schema.sql` and `seed.sql`), but the Node adapter gracefully falls back to an embedded SQLite instance if the evaluator does not have MySQL running locally, preventing setup bottlenecks. |
-| **Standardized `data-testid` Attributes** | XPath or CSS Class Selectors | XPath and CSS classes change with styling redesigns. `data-testid` attributes create an immutable contract between development and test automation. |
+| React frontend with an Express JSON API | A server-rendered application | Keeps browser interaction and API logic separate. The frontend must handle loading and API errors. |
+| SQLite by default with optional MySQL | MySQL required for every run | Makes local setup simpler. The fallback can hide a MySQL connection problem, and the two schemas are not identical. |
+| Hotel-level `total_rooms` count | Individual room records or per-date inventory | Keeps the example small, but does not support room types, room assignment, or precise occupancy calculations. |
+| Selenium Page Object Model | Selectors repeated in each test | Keeps page locators separate from test steps. Page objects still need updates when the UI changes. |
+| `data-testid` attributes on key controls | CSS classes or XPath selectors | Separates many test selectors from styling, but the attributes still need consistent coverage and maintenance. |
 
 ---
 
-## 8. Limitations and Future Improvements
+## 8. Limitations & Future Improvements
 
-With additional engineering time, the following enhancements would be added:
-1. **Multi-Room & Room Category Selection**: Support for Deluxe, Suite, and Standard categories per hotel.
-2. **Selenium Grid / Dockerized Cross-Browser Execution**: Running tests simultaneously on Chrome, Firefox, and Edge via Docker containers.
-3. **Email Notification Service**: Real-time confirmation emails with PDF receipts sent via Nodemailer / SendGrid.
-4. **Performance / Load Testing**: K6 or JMeter test scripts to simulate 500 simultaneous booking requests to benchmark database transaction lock contention.
+The current project demonstrates search, quotes, one-room bookings, retrieval, cancellation, and automated tests. Before using it as a production booking service, I would address these gaps:
 
+1. Make date validation reject impossible calendar dates and define the business timezone.
+2. Make inventory handling safe for simultaneous requests and calculate occupancy more precisely for different stay ranges.
+3. Require verified booking identity for cancellations. The current ID-only fallback should not be used in production.
+4. Either implement the advertised cancellation deadline and refund process, or remove that promise from the interface.
+5. Align the SQLite and MySQL schemas and add migrations and database constraints.
+6. Add room categories, multi-room booking, customer accounts, payments, confirmation emails, and operational monitoring as the product needs them.
+7. Replace static destination tips with maintained content and identify when the information was last updated.
+8. Add load and cross-browser testing as separate test improvements; current automated tests do not cover those areas.
