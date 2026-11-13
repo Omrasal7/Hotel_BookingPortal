@@ -1,0 +1,336 @@
+{
+  "info": {
+    "_postman_id": "b3e0984a-7182-4bf1-bf63-8a329fa03b22",
+    "name": "Thomas Cook Hotel Booking Portal - API Automation Suite",
+    "description": "Comprehensive Postman test collection for testing all REST endpoints, validation rules, pricing calculations, and cancellation workflows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Health & Discovery",
+      "item": [
+        {
+          "name": "GET Health Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"System health is UP\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql(\"UP\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "GET All Hotels (Browse)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Returns at least 5 hotels\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.expect(json.data.length).to.be.at.least(5);",
+                  "    pm.collectionVariables.set(\"firstHotelId\", json.data[0].id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hotels",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hotels"]
+            }
+          }
+        },
+        {
+          "name": "GET Filter Hotels by Destination (Goa)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"All returned hotels are in Goa\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.length).to.be.above(0);",
+                  "    json.data.forEach(function(h) {",
+                  "        pm.expect(h.location.toLowerCase()).to.include(\"goa\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hotels?location=Goa",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "hotels"],
+              "query": [
+                { "key": "location", "value": "Goa" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Pricing Quote & Availability",
+      "item": [
+        {
+          "name": "POST Generate Stay Quote (with 10% Long Stay Discount)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Applies 10% Long-Stay discount on 4+ nights\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.totalNights).to.be.at.least(4);",
+                  "    pm.expect(json.data.discountAmount).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_id\": 1,\n  \"check_in_date\": \"2026-12-01\",\n  \"check_out_date\": \"2026-12-06\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/quote",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "quote"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Booking Flow & Validation",
+      "item": [
+        {
+          "name": "POST Create Confirmed Booking (Positive Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Generates valid booking reference\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.booking_reference).to.match(/^TC-HB-/);",
+                  "    pm.expect(json.data.status).to.eql(\"CONFIRMED\");",
+                  "    pm.collectionVariables.set(\"lastBookingRef\", json.data.booking_reference);",
+                  "    pm.collectionVariables.set(\"lastGuestEmail\", json.data.guest_email);",
+                  "    pm.collectionVariables.set(\"lastBookingId\", json.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_id\": 1,\n  \"guest_name\": \"Kavita Raman\",\n  \"guest_email\": \"kavita.raman@example.com\",\n  \"check_in_date\": \"2026-12-10\",\n  \"check_out_date\": \"2026-12-14\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "POST Create Booking - Past Date Validation (Negative Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message indicates past date\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.include(\"past\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_id\": 1,\n  \"guest_name\": \"Tester\",\n  \"guest_email\": \"test@example.com\",\n  \"check_in_date\": \"2020-01-01\",\n  \"check_out_date\": \"2020-01-05\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "POST Create Booking - Check-out before Check-in (Negative Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Validation catches invalid date order\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.message).to.include(\"strictly after\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hotel_id\": 1,\n  \"guest_name\": \"Tester\",\n  \"guest_email\": \"test@example.com\",\n  \"check_in_date\": \"2026-12-15\",\n  \"check_out_date\": \"2026-12-12\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Retrieval & Cancellation",
+      "item": [
+        {
+          "name": "POST Retrieve Booking by Ref & Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Retrieves matching reservation\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.booking_reference).to.eql(pm.collectionVariables.get(\"lastBookingRef\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_reference\": \"{{lastBookingRef}}\",\n  \"guest_email\": \"{{lastGuestEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/retrieve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "retrieve"]
+            }
+          }
+        },
+        {
+          "name": "POST Cancel Booking & Release Room",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Status updated to CANCELLED\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.data.status).to.eql(\"CANCELLED\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"booking_reference\": \"{{lastBookingRef}}\",\n  \"guest_email\": \"{{lastGuestEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{lastBookingId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{lastBookingId}}", "cancel"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "firstHotelId", "value": "1" },
+    { "key": "lastBookingRef", "value": "TC-HB-SAMPLE" },
+    { "key": "lastGuestEmail", "value": "test@example.com" },
+    { "key": "lastBookingId", "value": "1" }
+  ]
+}
+
