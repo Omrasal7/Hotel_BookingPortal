@@ -13,6 +13,20 @@
 - Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
+## Screenshot
+<img width="1920" height="930" alt="image" src="https://github.com/user-attachments/assets/fa1b0174-8c40-4318-b712-83066c07ccd1" />
+
+<img width="1920" height="924" alt="image" src="https://github.com/user-attachments/assets/28d7cb59-56a4-4883-9ea5-a4920373cfa1" />
+
+<img width="1920" height="973" alt="image" src="https://github.com/user-attachments/assets/2c052ead-9944-4081-b5b5-87090920aa8f" />
+
+<img width="1588" height="842" alt="image" src="https://github.com/user-attachments/assets/a9a5e7ff-e58a-4d25-a66a-c2207d8a916f" />
+
+<img width="1053" height="546" alt="image" src="https://github.com/user-attachments/assets/1e8fde46-0b03-4b1d-a785-be8452a15bbf" />
+
+<img width="920" height="827" alt="image" src="https://github.com/user-attachments/assets/8eb3d769-e274-499f-bbb2-89703292ece9" />
+
+
 
 ## 🌟 Project Highlights for Automation Engineer Evaluators
 
@@ -337,12 +351,6 @@ Hotelbooking_portal/
 
 ---
 
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
 
 ## 📝 Disclosures
 
