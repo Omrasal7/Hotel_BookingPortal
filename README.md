@@ -264,10 +264,10 @@ Hotelbooking_portal/
 
 ## ⏱️ Time Spent & Unfinished Items
 
-- **Approximate Time Spent**: ~10 Hours
+- **Approximate Time Spent**: ~12 Hours
   - Architecture & Database Setup: 2 hours
   - Backend REST API & Validation Engine: 3 hours
-  - Frontend React UI & Design System: 1 hours
+  - Frontend React UI & Design System: 1.5 hours
   - Selenium WebDriver POM Automation Suite: 2 hours
   - Jest & Postman API Automation Suites: 1.5 hours
   - Documentation (Test Plan, Test Cases, Design, Bug Reports): 1 hours
