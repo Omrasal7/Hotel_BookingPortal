@@ -106,7 +106,7 @@ describe('Booking Logic & Pricing Calculation Unit Tests', () => {
     test('TC-ADV-01: Provides destination climate and packing tips', () => {
       const goaAdvisory = getDestinationAdvisory('Goa');
       expect(goaAdvisory.climate).toContain('Sunny');
-      expect(goaAdvisory.flexiCancellationHours).toBe(48);
+      expect(goaAdvisory.recommendation).toContain('Beachwear');
 
       const manaliAdvisory = getDestinationAdvisory('Manali');
       expect(manaliAdvisory.climate).toContain('Mountain');

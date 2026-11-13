@@ -220,7 +220,7 @@ describe('Thomas Cook Hotel Booking REST API - Automated Integration Suite', () 
   });
 
   describe('4. Availability Tracking & Overbooking Capacity Boundary', () => {
-    test('TC-API-13: Overbooking prevention - booking all available rooms and verifying sold out', async () => {
+    test('TC-API-13: Sequential capacity boundary - rejects a booking after all rooms are filled', async () => {
       // Hotel 4 has total_rooms = 5
       const checkIn = getFutureDate(30);
       const checkOut = getFutureDate(32);

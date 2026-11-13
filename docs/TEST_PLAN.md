@@ -37,9 +37,9 @@ As an **Automation Engineer**, the goal is to guarantee software quality, verify
 - **Booking Lifecycle**:
   - Unique booking reference code generation (`TC-HB-XXXXXX`).
   - Booking lookup by reference code and case-insensitive email.
-  - One-click cancellation and audit timestamping.
-- **Simultaneous Bookings / Concurrency Handling**:
-  - Preventing race conditions where two simultaneous users attempt to book the last available room.
+  - Cancellation through the management flow and cancellation timestamping.
+- **Known Inventory Limitation**:
+  - Capacity is checked for sequential requests. Simultaneous requests may both pass the check; this behavior is not covered by the current automated tests.
 
 ### 2.2 Out-of-Scope Items
 - Credit card / payment gateway processing (as stated in assignment brief).
@@ -71,7 +71,7 @@ The testing strategy adheres strictly to the **Agile Test Automation Pyramid**:
   - `BookingModalPage.js`: Guest inputs, stay dates, real-time price summary calculation.
   - `ConfirmationModalPage.js`: Booking reference code extraction and verification.
   - `ManageBookingPage.js`: Reference + email lookup and cancellation workflow.
-- **Testability Locator Strategy**: All interactive UI elements utilize dedicated, standardized `data-testid` attributes (e.g., `data-testid="btn-confirm-booking"`), eliminating brittle CSS/XPath selectors.
+- **Testability Locator Strategy**: Key interactive controls use `data-testid` attributes (e.g., `data-testid="btn-confirm-booking"`) so tests do not depend only on styling selectors.
 - **Execution Modes**: Supports interactive headed mode for demonstration and headless mode (`--headless=new`) for headless CI/CD execution.
 
 ### 3.2 API Automation & Postman Collection
@@ -104,8 +104,8 @@ Defects identified during automated and exploratory testing are categorized as:
 
 ## 6. Exit Criteria for Release
 
-1. 100% of P1 and P2 test cases pass.
-2. All 23 automated API & booking logic unit tests pass.
-3. All Selenium WebDriver E2E scenarios pass in headless and headed modes.
-4. Zero unhandled server crashes or race-condition data corruptions.
+1. Critical booking, pricing, and validation scenarios pass in the relevant suites.
+2. The 23 Jest and Supertest API and booking logic tests pass.
+3. The Selenium WebDriver scenarios pass in the mode being used for evaluation.
+4. Known limitations, including simultaneous booking behavior, are documented accurately for the evaluator.
 

@@ -190,8 +190,8 @@ export default function App() {
             <p>Hotel Booking Portal - Automation Engineering Interview Assignment</p>
           </div>
           <div className="footer-right">
-            <span className="footer-badge"><ShieldCheck size={14} /> 100% Verified Availability</span>
-            <span className="footer-badge"><Award size={14} /> Best Rate Guarantee</span>
+            <span className="footer-badge"><ShieldCheck size={14} /> Check availability for your dates</span>
+            <span className="footer-badge"><Award size={14} /> 10% off stays of 4+ nights</span>
           </div>
         </div>
       </footer>

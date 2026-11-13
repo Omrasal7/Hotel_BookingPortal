@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Star, MapPin, Check, ShieldCheck, Sun, ArrowRight, Shield } from 'lucide-react';
+import { X, Star, MapPin, Check, Sun, ArrowRight, Shield } from 'lucide-react';
 
 export default function HotelDetailModal({ hotel, onClose, onProceedToBook }) {
   if (!hotel) return null;
@@ -49,10 +49,6 @@ export default function HotelDetailModal({ hotel, onClose, onProceedToBook }) {
               <div className="advisory-body">
                 <p><strong>Climate:</strong> {hotel.advisory.climate}</p>
                 <p><strong>Travel Tip:</strong> {hotel.advisory.recommendation}</p>
-                <div className="advisory-guarantee">
-                  <ShieldCheck size={16} />
-                  <span>Free cancellation guarantee up to 48 hours before check-in.</span>
-                </div>
               </div>
             </div>
           )}

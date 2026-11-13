@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, User, Mail, ShieldCheck, Tag, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Calendar, User, Mail, Tag, AlertCircle, Loader2 } from 'lucide-react';
 import { fetchBookingQuote, submitBooking } from '../services/api';
 
 export default function BookingModal({
@@ -264,12 +264,12 @@ export default function BookingModal({
             )}
           </div>
 
-          {/* Surprise Guarantee */}
-          <div className="booking-guarantee-box">
-            <ShieldCheck size={18} className="shield-icon" />
+          {/* Cancellation information */}
+          <div className="booking-cancellation-note">
+            <Calendar size={18} />
             <div>
-              <strong>Thomas Cook Free Cancellation Guarantee</strong>
-              <p>Cancel free of charge up to 48 hours before check-in. Instant room release and 100% refund.</p>
+              <strong>Cancellation</strong>
+              <p>You can cancel a confirmed booking from Manage Booking. This demo does not process refunds.</p>
             </div>
           </div>
 

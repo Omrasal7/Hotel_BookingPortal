@@ -46,10 +46,7 @@ function validateStayDates(checkInStr, checkOutStr) {
 }
 
 /**
- * Surprise Feature Calculation:
- * - Dynamic Long-Stay Loyalty Discount: 10% off for stays of 4+ nights
- * - Free Cancellation Cutoff Window (48 hours before check-in)
- * - Transparent price breakdown
+ * Price calculation and breakdown, including the long-stay discount.
  */
 function calculateStayPricing(roomPricePerNight, totalNights) {
   const price = parseFloat(roomPricePerNight);
@@ -77,47 +74,39 @@ function calculateStayPricing(roomPricePerNight, totalNights) {
 }
 
 /**
- * Surprise Feature Advisory:
- * Real-time seasonal weather & travel tip for popular destinations
+ * Static destination climate descriptions and travel tips.
  */
 function getDestinationAdvisory(location) {
   const advisories = {
     Goa: {
       climate: 'Tropical & Sunny (28°C - 32°C)',
       recommendation: 'Beachwear, sunscreen & sunglasses recommended. Ideal for water sports and evening beach shacks.',
-      flexiCancellationHours: 48
     },
     Jaipur: {
       climate: 'Pleasant & Royal (22°C - 27°C)',
       recommendation: 'Comfortable cottons for day fort visits, light shawl for evening cultural shows.',
-      flexiCancellationHours: 48
     },
     Mumbai: {
       climate: 'Warm & Coastal Breeze (27°C - 31°C)',
       recommendation: 'Light breathable clothes. Great for Marine Drive sunset walks and heritage district tours.',
-      flexiCancellationHours: 48
     },
     Manali: {
       climate: 'Crisp Mountain Breeze (10°C - 16°C)',
       recommendation: 'Warm jackets and sturdy shoes recommended. Perfect for Solang Valley and hot springs.',
-      flexiCancellationHours: 48
     },
     Munnar: {
       climate: 'Cool & Misty (15°C - 21°C)',
       recommendation: 'Light woolens and walking shoes. Ideal for misty tea garden treks and spice plantations.',
-      flexiCancellationHours: 48
     },
     Bengaluru: {
       climate: 'Pleasant & Moderate (20°C - 26°C)',
       recommendation: 'Casual smart wear. Great weather year-round for rooftop dining and park strolls.',
-      flexiCancellationHours: 48
     }
   };
 
   return advisories[location] || {
     climate: 'Comfortable & Welcoming',
     recommendation: 'Standard travel essentials recommended.',
-    flexiCancellationHours: 48
   };
 }
 

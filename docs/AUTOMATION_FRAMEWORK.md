@@ -70,7 +70,7 @@ npm run test:e2e:headless
 
 ### 3. From Project Root
 ```bash
-# Run both Backend API tests and Selenium E2E suite
+# Run Backend API tests and the Python Selenium E2E suite
 npm run test:all
 ```
 

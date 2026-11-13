@@ -92,7 +92,7 @@ A confirmed booking overlaps the requested stay when its check-in is before the 
 
 The model counts confirmed booking rows that overlap any part of the requested range, then subtracts that count from the hotel's `total_rooms`. Cancelled bookings are excluded. This simple count can report too few rooms when existing bookings overlap different parts of a longer requested stay; it does not calculate peak occupancy day by day.
 
-The availability check and booking insert are separate operations. The application checks capacity for ordinary sequential requests, but it does not guarantee capacity if requests arrive at the same time. Two requests for the last room could both pass the check before either insert completes.
+The availability check and booking insert are separate operations. The application checks capacity for sequential requests, but it does not guarantee capacity if requests arrive at the same time. Two requests for the last room could both pass the check before either insert completes.
 
 ### Cancellation
 
@@ -110,15 +110,15 @@ Stays of four nights or more receive a 10% discount. The backend calculates the 
 
 Hotel responses include a destination advisory with a climate description and a packing or activity suggestion for supported cities. These values are a hard-coded lookup in `dateUtils.js`; they are not live weather data.
 
-### Cancellation wording in the interface
+### Cancellation behavior
 
-The booking interface currently advertises free cancellation up to 48 hours before check-in and a full refund. The backend does not enforce that deadline and does not issue refunds. The 48-hour value returned by the advisory is metadata only. The cancellation guarantee is therefore displayed in the interface, but is not implemented as a booking or payment rule.
+Guests can cancel a confirmed booking through Manage Booking. Cancellation changes its status and removes it from availability counts. The project does not process refunds or enforce a cancellation deadline.
 
 ---
 
 ## 6. Simultaneous Bookings
 
-The current implementation checks availability and then inserts a booking as separate database operations. It does not use a transaction, lock an inventory row, or atomically reserve a room. If two users submit requests for the last available room at the same time, both may see the room as available and both may be confirmed.
+The current implementation checks availability and then inserts a booking as separate database operations, without an atomic reservation step. If two users submit requests for the last available room at the same time, both may see the room as available and both may be confirmed.
 
 The API test that fills a hotel's rooms sends requests sequentially and verifies that the next request is rejected. It checks the capacity boundary for sequential requests; it does not test simultaneous requests or prevent the race described above.
 
@@ -143,7 +143,7 @@ The current project demonstrates search, quotes, one-room bookings, retrieval, c
 1. Make date validation reject impossible calendar dates and define the business timezone.
 2. Make inventory handling safe for simultaneous requests and calculate occupancy more precisely for different stay ranges.
 3. Require verified booking identity for cancellations. The current ID-only fallback should not be used in production.
-4. Either implement the advertised cancellation deadline and refund process, or remove that promise from the interface.
+4. Add a cancellation deadline and refund process only if the product needs that policy.
 5. Align the SQLite and MySQL schemas and add migrations and database constraints.
 6. Add room categories, multi-room booking, customer accounts, payments, confirmation emails, and operational monitoring as the product needs them.
 7. Replace static destination tips with maintained content and identify when the information was last updated.

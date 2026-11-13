@@ -86,7 +86,7 @@ async function createBooking(req, res) {
       });
     }
 
-    // Availability verification (Prevent overbooking beyond capacity)
+    // Check the current availability count before creating this booking.
     const availability = await bookingModel.checkAvailability(hotel_id, check_in_date, check_out_date);
     if (availability.availableRooms <= 0) {
       return res.status(400).json({

@@ -5,9 +5,9 @@
 | **Hotel Browsing & Search** | 6 | 6 | — |
 | **Date & Boundary Validation** | 6 | 6 | — |
 | **Pricing Engine & Surprise Feature** | 5 | 5 | — |
-| **Booking Creation & Concurrency** | 6 | 6 | — |
+| **Booking Creation & Capacity** | 4 | 4 | — |
 | **Retrieval & Cancellation** | 5 | 5 | — |
-| **Total** | **28** | **28 (100%)** | — |
+| **Total** | **26** | **26 (100%)** | — |
 
 ---
 
@@ -49,15 +49,16 @@
 
 ---
 
-## 4. Booking Creation & Availability Concurrency
+## 4. Booking Creation & Availability
 
 | Test ID | Test Scenario | Pre-conditions | Test Steps | Test Data | Expected Result | Type | Automation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **TC-BOK-01** | Successful booking flow (Happy Path) | Available rooms > 0 | 1. Select hotel<br>2. Enter name & email<br>3. Confirm | Valid details | 201 Created; returns unique reference (`TC-HB-XXXXXX`) | Positive | Selenium & Jest |
 | **TC-BOK-02** | Overlapping stay calculation | 1 confirmed booking exists | 1. Search availability with dates overlapping existing stay | Overlapping dates | Available room count decrements by 1 | Positive | Jest |
 | **TC-BOK-03** | Adjacent stay dates (No overlap) | Booking exists `[10th - 15th]` | 1. Query availability for `[15th - 18th]` | Check-in on same day previous guest checks out | No overlap counted; room is available on checkout day | Boundary | Jest |
-| **TC-BOK-04** | Overbooking prevention at capacity limit | Hotel capacity = 5 rooms | 1. Create 5 bookings for identical dates<br>2. Attempt 6th booking | 6th booking request | 400 Bad Request: "No rooms available for the selected dates." | Boundary (Sold-out) | Jest |
-| **TC-BOK-05** | Simultaneous booking race condition simulation | 1 room remaining | 1. Fire 2 concurrent HTTP requests for last room | 2 simultaneous requests | Only 1 request receives 201 Created; 2nd receives 400 Sold Out | Concurrency | Jest |
+| **TC-BOK-04** | Sequential capacity boundary | Hotel capacity = 5 rooms | 1. Create 5 bookings for identical dates<br>2. Attempt a 6th booking | 6th booking request | 400 Bad Request: "No rooms available for the selected dates." | Boundary (Sold-out) | Jest |
+
+The current automated capacity test sends requests sequentially. Simultaneous requests are not tested; the current implementation may confirm more bookings than the room capacity under that race.
 
 ---
 

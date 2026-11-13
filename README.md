@@ -3,7 +3,6 @@
 > **Assignment Submission for:** Automation Engineer Intern  
 > **Company:** Thomas Cook (India) Limited  
 > **Candidate Focus:** Quality Assurance & Test Automation Engineering (Selenium WebDriver, REST API Testing, Postman, CI/CD)  
-> **Effort Spent:** ~14 hours (Design, Architecture, Web App, Page Object Model Selenium Framework, API Test Suite, Postman Collection, CI/CD Pipeline, and STLC Documentation)
 
 
 ---
@@ -31,18 +30,19 @@
 
 ---
 
-## 🌟 Project Highlights for Automation Engineer Evaluators
+## Project Highlights for Automation Engineer Evaluators
 
 This project is built with a primary emphasis on **Software Quality Assurance and Test Automation Engineering**:
-1. **Full Automation Test Coverage**:
-   - **Selenium WebDriver (JavaScript POM)**: 13 End-to-End browser test scenarios covering the full user booking journey, search, date validation edge cases, and cancellation.
-   - **Jest + Supertest API Suite**: 23 automated integration & logic test cases validating status codes, contract schemas, price calculations, and overbooking prevention.
+1. **Automated test suites**:
+   - **Selenium WebDriver (JavaScript POM)**: 13 end-to-end scenarios covering search, booking, date validation, retrieval, and cancellation.
+   - **Jest + Supertest**: 23 API and business-logic tests covering response status, date and price rules, booking lifecycle, and the sequential capacity limit.
+   - **Python Selenium (PyTest + POM)**: A second browser test suite with an HTML execution report.
    - **Postman API Test Suite**: Fully exported collection with environment variables and assertions (`pm.test()`).
 2. **Design For Testability (DFT)**:
-   - All interactive UI elements are instrumented with standardized `data-testid` attributes.
+   - Key interactive controls use `data-testid` selectors for browser automation.
    - Dedicated **QA Mode toggle button** in the UI navigation bar highlighting test locators and providing one-click test data injection.
 3. **Continuous Integration (CI/CD)**:
-   - Pre-configured GitHub Actions workflow (`.github/workflows/test-automation.yml`) executing API tests and headless Selenium runs on PR/push.
+   - The GitHub Actions workflow (`.github/workflows/test-automation.yml`) runs backend tests, builds the frontend, and runs the Python Selenium suite in headless mode on pushes and pull requests to `main` or `master`. The JavaScript Selenium suite is available locally and is not run by this workflow.
 4. **Complete STLC Documentation**:
    - Master Test Plan (`docs/TEST_PLAN.md`), Detailed Test Cases Matrix (`docs/TEST_CASES.md`), and Defect Reports (`docs/BUG_REPORT_SAMPLE.md`).
 
@@ -71,6 +71,7 @@ This project is built with a primary emphasis on **Software Quality Assurance an
 ### Prerequisites
 - [Node.js](https://nodejs.org/) v18 or later
 - [Google Chrome](https://www.google.com/chrome/) installed
+- Python 3 and pip (for the Python Selenium suite)
 - (Optional) MySQL Server 8.0+
 
 ---
@@ -90,6 +91,9 @@ cd frontend && npm install && cd ..
 
 # 4. Install automation test dependencies
 cd automation-tests && npm install && cd ..
+
+# 5. Install Python Selenium test dependencies (for the Python suite)
+python -m pip install -r automation-tests-python/requirements.txt
 ```
 
 ### Step 2: Database Configuration (MySQL or Instant SQLite)
@@ -104,6 +108,7 @@ No database setup is required! The backend automatically initializes and seeds 6
    mysql -u root -p < backend/database/schema.sql
    mysql -u root -p < backend/database/seed.sql
    ```
+   The seed script clears existing sample hotel and booking rows before inserting demo data. Use it with a fresh evaluation database.
 3. Update `backend/.env` with your MySQL credentials:
    ```env
    DB_DIALECT=mysql
@@ -137,7 +142,7 @@ npm start
 ## 🧪 Running Automated Test Suites
 
 ### 1. Run REST API & Business Logic Automated Tests (Jest)
-Runs 23 automated tests covering date boundary validation, pricing logic, discount calculations, booking creation, retrieval, cancellation, and overbooking prevention:
+Runs 23 automated tests covering date boundary validation, pricing logic, booking creation, retrieval, cancellation, and the sequential capacity limit:
 
 ```bash
 npm run test:api
@@ -165,9 +170,9 @@ cd automation-tests-python
 python run_tests.py
 
 # Run in headed mode (watch Chrome open and execute live):
-set HEADLESS=false && python run_tests.py
+npm run test:python:headed
 ```
-*After running, open `automation-tests-python/reports/test_execution_report.html` in your browser to view the visual execution report with pass/fail charts!*
+After running, open `automation-tests-python/reports/test_execution_report.html` in a browser to view the test results.
 
 #### 🌐 B. JavaScript Selenium WebDriver Suite (Optional Alternative)
 ```bash
@@ -177,10 +182,11 @@ npm run test:e2e:headless
 
 ---
 
-### 3. Run All Tests Combined
+### 3. Run the API and Python Selenium suites
 ```bash
 npm run test:all
 ```
+This command does not run the JavaScript Selenium suite. Run that suite separately with `npm run test:e2e` or `npm run test:e2e:headless`.
 
 
 ---
@@ -203,7 +209,7 @@ Hotelbooking_portal/
 │   ├── database/
 │   │   ├── schema.sql             # MySQL DDL schema
 │   │   ├── seed.sql               # Sample seed data for 6 hotels
-│   │   └── initDb.js              # Migration runner
+│   │   └── initDb.js              # MySQL schema and sample-data initializer
 │   ├── src/
 │   │   ├── config/db.js           # Multi-dialect database adapter (MySQL + SQLite)
 │   │   ├── controllers/           # hotelController & bookingController
@@ -242,7 +248,7 @@ Hotelbooking_portal/
 ├── postman/                       # Postman test collection & environment
 ├── docs/
 │   ├── TEST_PLAN.md               # Master Test Plan following IEEE 829 standards
-│   ├── TEST_CASES.md              # Detailed Test Cases & Traceability Matrix (28 cases)
+│   ├── TEST_CASES.md              # Detailed Test Cases & Traceability Matrix (26 cases)
 │   ├── BUG_REPORT_SAMPLE.md       # Professional defect reports caught during testing
 │   └── AUTOMATION_FRAMEWORK.md    # Framework architecture & POM design guide
 ├── .github/workflows/
@@ -254,23 +260,17 @@ Hotelbooking_portal/
 
 ---
 
-## 🎁 Surprise Feature: Thomas Cook "Flexi-Stay" & Dynamic Loyalty Engine
+## Additional Booking Features
 
-1. **Dynamic Long-Stay Loyalty Discount**: Bookings of 4 or more nights automatically qualify for a **10% Thomas Cook loyalty discount**, calculated and itemized transparently on the backend and frontend.
-2. **Destination Weather & Travel Packing Advisory**: Displays seasonal climate insights and packing tips tailored for each city (e.g. Goa, Jaipur, Manali, Munnar).
-3. **48-Hour Free Cancellation Guarantee**: Explicit assurance window with one-click cancellation and instant inventory restoration.
+1. **Long-stay discount**: Stays of 4 or more nights receive a 10% discount, calculated by the backend and shown in the price breakdown.
+2. **Destination advisory**: Hotel details include static climate descriptions and packing or activity tips for supported cities. These are not live weather forecasts.
+3. **Booking cancellation**: A confirmed booking can be cancelled from Manage Booking, which changes its status and releases it from availability counts. This demo does not enforce a cancellation deadline or process refunds.
 
 ---
 
 ## ⏱️ Time Spent & Unfinished Items
 
-- **Approximate Time Spent**: ~12 Hours
-  - Architecture & Database Setup: 2 hours
-  - Backend REST API & Validation Engine: 3 hours
-  - Frontend React UI & Design System: 1.5 hours
-  - Selenium WebDriver POM Automation Suite: 2 hours
-  - Jest & Postman API Automation Suites: 1.5 hours
-  - Documentation (Test Plan, Test Cases, Design, Bug Reports): 1 hours
+- **Approximate Time Spent**: ~12 hours
 
 - **Unfinished Items (Deferred for future iterations)**:
   - Multi-room booking support in a single order (currently 1 room per booking as permitted).
