@@ -1,32 +1,35 @@
-# Thomas Cook Hotel Booking Portal — Automation Engineering Project
+# Thomas Cook Hotel Booking Portal:
 
 > **Assignment Submission for:** Automation Engineer Intern  
 > **Company:** Thomas Cook (India) Limited  
 > **Candidate Focus:** Quality Assurance & Test Automation Engineering (Selenium WebDriver, REST API Testing, Postman, CI/CD)  
 > **Effort Spent:** ~14 hours (Design, Architecture, Web App, Page Object Model Selenium Framework, API Test Suite, Postman Collection, CI/CD Pipeline, and STLC Documentation)
 
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
 ## Screenshot
 <img width="1920" height="930" alt="image" src="https://github.com/user-attachments/assets/fa1b0174-8c40-4318-b712-83066c07ccd1" />
 
+---
 <img width="1920" height="924" alt="image" src="https://github.com/user-attachments/assets/28d7cb59-56a4-4883-9ea5-a4920373cfa1" />
+
+---
 
 <img width="1920" height="973" alt="image" src="https://github.com/user-attachments/assets/2c052ead-9944-4081-b5b5-87090920aa8f" />
 
+---
+
 <img width="1588" height="842" alt="image" src="https://github.com/user-attachments/assets/a9a5e7ff-e58a-4d25-a66a-c2207d8a916f" />
+
+---
 
 <img width="1053" height="546" alt="image" src="https://github.com/user-attachments/assets/1e8fde46-0b03-4b1d-a785-be8452a15bbf" />
 
+---
+
 <img width="920" height="827" alt="image" src="https://github.com/user-attachments/assets/8eb3d769-e274-499f-bbb2-89703292ece9" />
 
-
+---
 
 ## 🌟 Project Highlights for Automation Engineer Evaluators
 
@@ -63,26 +66,12 @@ This project is built with a primary emphasis on **Software Quality Assurance an
 
 ---
 
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
-
 ## 🚀 Quick Start Guide (Run Locally)
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) v18 or later
 - [Google Chrome](https://www.google.com/chrome/) installed
 - (Optional) MySQL Server 8.0+
-
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
 
@@ -102,15 +91,6 @@ cd frontend && npm install && cd ..
 # 4. Install automation test dependencies
 cd automation-tests && npm install && cd ..
 ```
-
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
 
 ### Step 2: Database Configuration (MySQL or Instant SQLite)
 
@@ -137,12 +117,6 @@ No database setup is required! The backend automatically initializes and seeds 6
 
 ---
 
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
 
 ### Step 3: Run the Application
 
@@ -159,12 +133,6 @@ npm start
 
 ---
 
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
 
 ## 🧪 Running Automated Test Suites
 
@@ -180,12 +148,6 @@ To view code coverage:
 npm run test:api:coverage
 ```
 
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
 
@@ -215,24 +177,11 @@ npm run test:e2e:headless
 
 ---
 
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
-
 ### 3. Run All Tests Combined
 ```bash
 npm run test:all
 ```
 
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
 
@@ -243,13 +192,6 @@ npm run test:all
    - `postman/Thomas_Cook_Hotel_Booking_Env.postman_environment.json`
 3. Select the **Thomas Cook Local Environment**.
 4. Click **Run Collection** to execute all requests with built-in assertions.
-
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
 
@@ -312,25 +254,11 @@ Hotelbooking_portal/
 
 ---
 
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
-
----
-
 ## 🎁 Surprise Feature: Thomas Cook "Flexi-Stay" & Dynamic Loyalty Engine
 
 1. **Dynamic Long-Stay Loyalty Discount**: Bookings of 4 or more nights automatically qualify for a **10% Thomas Cook loyalty discount**, calculated and itemized transparently on the backend and frontend.
 2. **Destination Weather & Travel Packing Advisory**: Displays seasonal climate insights and packing tips tailored for each city (e.g. Goa, Jaipur, Manali, Munnar).
 3. **48-Hour Free Cancellation Guarantee**: Explicit assurance window with one-click cancellation and instant inventory restoration.
-
----
-
-## 🎬 Demo & Workflow Video
-
-- Test case walkthrough: https://drive.google.com/file/d/1EC1SSPtbw2Tq1Sw3h020jXlKXfWZrq_j/view?usp=sharing
-- Workflow illustration: https://drive.google.com/file/d/19oPFjwmvXWJgtg4ROF-hkgkcZyK2VRuG/view?usp=sharing
 
 ---
 
